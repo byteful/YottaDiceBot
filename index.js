@@ -18,7 +18,7 @@ let shouldRun = true;
 
 // direction: "OVER", "UNDER"
 const roll = async (amount, threshold, direction) => {
-  amount = "" + amount; // Force to string to improve formatting
+  amount = amount.toFixed(2); // Force to string to prevent precision loss number input
   let res = await fetch("https://api.withyotta.com/v1/app/games/dice", {
     "headers": {
       "accept": "application/json, text/plain, */*",
@@ -44,6 +44,11 @@ const roll = async (amount, threshold, direction) => {
     "mode": "cors",
     "credentials": "include"
   });
+
+  if (!res.ok) {
+    console.error(`HTTP Error: ${res.status} ${res.statusText}`);
+    return null;
+  }
 
   res = await res.json();
 
@@ -82,6 +87,11 @@ const getBalance = async () => {
     "credentials": "include"
   });
 
+  if (!res.ok) {
+    console.error(`HTTP Error: ${res.status} ${res.statusText}`);
+    return null;
+  }
+
   res = await res.json();
 
   return CONFIG.WAGER_CURRENCY === "YOTTA_CASH" ? parseFloat(res.available) : parseInt(res.balance);
@@ -89,10 +99,10 @@ const getBalance = async () => {
 
 const run = async () => {
   if (!isLoaded || !shouldRun) return;
-  console.log("+===================================================================+");
-  console.log("Balance is now at: " + currentBalance.toFixed(2));
-  console.log("Total win/loss is: " + totalDifference.toFixed(2));
-  console.log("-----");
+  console.log("+=================================================================================+");
+  let msg = `Balance: ${currentBalance.toFixed(2)} | P/L: ${totalDifference.toFixed(2)} | Losses: ${losses} | Bet: ${currentBetAmount.toFixed(4)}`;
+  console.log(msg);
+  console.log("--" + "-".repeat(msg.length));
 
   if (currentBalance < CONFIG.SAFETY_VALUE) {
     console.error("WE HIT SAFETY VALUE! BOT IS EXITING.")
@@ -102,10 +112,11 @@ const run = async () => {
 
   console.log("Rolling dice with bet: " + currentBetAmount);
   let rollResult = await roll(currentBetAmount, CONFIG.THRESHOLD, CONFIG.DIRECTION);
-  if (!rollResult) return; // Errored, so lets stop here.
+  if (rollResult === null) return; // Errored, so lets stop here.
   const newBalance = await getBalance();
+  if (newBalance === null) return; // Errored, so lets stop here.
   const diff = newBalance - currentBalance;
-  console.log("Dice roll outcome: (diff: " + diff.toFixed(2) + ") (win: " + rollResult.won + ")");
+  console.log(`Outcome: ${rollResult.won ? 'WIN' : 'LOSS'} | Diff: ${diff.toFixed(2)}`);
 
   totalDifference += diff;
 
@@ -123,6 +134,7 @@ const run = async () => {
     if (newBalance < (lastWinBalance - CONFIG.STOP_LOSS_THRESHOLD)) {
       lastWinBalance = newBalance; // has to reset last win balance
       currentBetAmount = CONFIG.STARTING_BET;
+      losses = 0;
       console.log("Stop loss detected, resetting to starting bet.")
     } else {
       // check loss thresholds
@@ -159,9 +171,13 @@ const run = async () => {
 // Load current balance, then run the bot.
 console.log("Loading...")
 getBalance().then(loaded => {
+  if (loaded === null) {
+    console.error("Failed to load!");
+    return;
+  }
   console.log("Loaded! Bot is starting now.")
   currentBalance = loaded;
-  lastWinBalance = currentBalance + CONFIG.STOP_LOSS_THRESHOLD;
+  lastWinBalance = currentBalance;
   isLoaded = true;
 }).then(() => {
   if (!CONFIG.DEVELOPMENT) {
