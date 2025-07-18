@@ -13,7 +13,7 @@ export default {
     LOSS_THRESHOLD: 2, // Consistent with initial threshold
     
     // OPTIMAL TIMING
-    RUN_DELAY: 500, // Fastest safe execution for compound growth
+    RUN_DELAY: 1000, // Fastest safe execution for compound growth
     
     // OPTIMAL BET SIZING
     STARTING_BET: 0.01, // Keep small for progression math
@@ -23,6 +23,6 @@ export default {
     SAFETY_VALUE: 20.00, // 20% of typical starting balance for early protection
     
     // GAME SETTINGS
-    THRESHOLD: 49.5,
+    THRESHOLD: 50,
     DIRECTION: "OVER",
 }

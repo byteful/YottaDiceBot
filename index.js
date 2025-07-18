@@ -18,7 +18,6 @@ let shouldRun = true;
 
 // direction: "OVER", "UNDER"
 const roll = async (amount, threshold, direction) => {
-  amount = amount.toFixed(2); // Force to string to prevent precision loss number input
   let res = await fetch("https://api.withyotta.com/v1/app/games/dice", {
     "headers": {
       "accept": "application/json, text/plain, */*",
@@ -39,14 +38,14 @@ const roll = async (amount, threshold, direction) => {
       "sec-fetch-site": "same-site"
     },
     "referrer": "https://members.withyotta.com/",
-    "body": `{"wager_amount":${CONFIG.WAGER_CURRENCY === "YOTTA_CASH" ? parseFloat(amount) : parseInt(amount)},"wager_currency":"${CONFIG.WAGER_CURRENCY}", "direction":"${direction}","threshold":${threshold},"use_free_play_credit":false}`,
+    "body": `{"wager_amount":${CONFIG.WAGER_CURRENCY === "YOTTA_CASH" ? amount.toFixed(2) : amount.toFixed(0)},"wager_currency":"${CONFIG.WAGER_CURRENCY}", "direction":"${direction}","threshold":${threshold.toFixed(0)},"use_free_play_credit":false}`,
     "method": "POST",
     "mode": "cors",
     "credentials": "include"
   });
 
   if (!res.ok) {
-    console.error(`HTTP Error: ${res.status} ${res.statusText}`);
+    console.error(`[roll] HTTP Error: ${res.status} ${res.statusText}`);
     return null;
   }
 
@@ -88,7 +87,7 @@ const getBalance = async () => {
   });
 
   if (!res.ok) {
-    console.error(`HTTP Error: ${res.status} ${res.statusText}`);
+    console.error(`[getBalance] HTTP Error: ${res.status} ${res.error}`);
     return null;
   }
 
@@ -99,7 +98,7 @@ const getBalance = async () => {
 
 const run = async () => {
   if (!isLoaded || !shouldRun) return;
-  console.log("+=================================================================================+");
+  console.log("+==============================================================================+");
   let msg = `Balance: ${currentBalance.toFixed(2)} | P/L: ${totalDifference.toFixed(2)} | Losses: ${losses} | Bet: ${currentBetAmount.toFixed(4)}`;
   console.log(msg);
   console.log("--" + "-".repeat(msg.length));
