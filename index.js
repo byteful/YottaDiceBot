@@ -16,85 +16,130 @@ let totalDifference = 0;
 let shouldRun = true;
 //
 
+// Retry configuration
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  baseDelay: 1000, // 1 second
+  maxDelay: 10000, // 10 seconds
+  backoffMultiplier: 2
+};
+
+// Generic retry function with exponential backoff
+const retryWithBackoff = async (fn, retries = RETRY_CONFIG.maxRetries) => {
+  let lastError;
+  
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const result = await fn();
+      if (result !== null) {
+        return result;
+      }
+      throw new Error('Function returned null');
+    } catch (error) {
+      lastError = error;
+      
+      if (attempt === retries) {
+        console.error(`Final attempt failed after ${retries + 1} tries:`, error.message);
+        break;
+      }
+      
+      const delay = Math.min(
+        RETRY_CONFIG.baseDelay * Math.pow(RETRY_CONFIG.backoffMultiplier, attempt),
+        RETRY_CONFIG.maxDelay
+      );
+      
+      console.log(`Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  return null;
+};
+
 // direction: "OVER", "UNDER"
 const roll = async (amount, threshold, direction) => {
   const body = `{"wager_amount":${CONFIG.WAGER_CURRENCY === "YOTTA_CASH" ? amount.toFixed(2) : amount.toFixed(0)},"wager_currency":"${CONFIG.WAGER_CURRENCY}","direction":"${direction}","threshold":${threshold.toFixed(0)},"use_free_play_credit":false}`;
-  let res = await fetch("https://api.withyotta.com/v1/app/games/dice", {
-    "headers": {
-      "accept": "application/json, text/plain, */*",
-      "accept-language": "en-US,en;q=0.9",
-      "app_name": "Yotta",
-      "app_version": "6.19.154",
-      "authorization": "Bearer " + CONFIG.API_TOKEN,
-      "content-type": "application/json;charset=UTF-8",
-      "device_id": CONFIG.DEVICE_ID,
-      "device_name": "Chrome",
-      "platform": "web",
-      "priority": "u=1, i",
-      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
-      "sec-ch-ua-mobile": "?1",
-      "sec-ch-ua-platform": "\"Android\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-site"
-    },
-    "referrer": "https://members.withyotta.com/",
-    "body": body,
-    "method": "POST",
-    "mode": "cors",
-    "credentials": "include"
-  });
+  
+  const makeRequest = async () => {
+    let res = await fetch("https://api.withyotta.com/v1/app/games/dice", {
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "en-US,en;q=0.9",
+        "app_name": "Yotta",
+        "app_version": "6.19.154",
+        "authorization": "Bearer " + CONFIG.API_TOKEN,
+        "content-type": "application/json;charset=UTF-8",
+        "device_id": CONFIG.DEVICE_ID,
+        "device_name": "Chrome",
+        "platform": "web",
+        "priority": "u=1, i",
+        "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+        "sec-ch-ua-mobile": "?1",
+        "sec-ch-ua-platform": "\"Android\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site"
+      },
+      "referrer": "https://members.withyotta.com/",
+      "body": body,
+      "method": "POST",
+      "mode": "cors",
+      "credentials": "include"
+    });
 
-  if (!res.ok) {
-    console.error(`[roll] HTTP Error: ${res.status} ${res.statusText}`);
-    return null;
-  }
+    if (!res.ok) {
+      throw new Error(`HTTP Error: ${res.status} ${res.statusText}`);
+    }
 
-  res = await res.json();
+    res = await res.json();
 
-  if (res.error_subtitle) {
-    console.error("Dice roll error! " + res.error_title + ":" + res.error_subtitle);
-    return null;
-  }
+    if (res.error_subtitle) {
+      throw new Error(`Dice roll error! ${res.error_title}: ${res.error_subtitle}`);
+    }
 
-  return { won: res.dice_game.did_win };
+    return { won: res.dice_game.did_win };
+  };
+
+  return await retryWithBackoff(makeRequest);
 };
 
 const getBalance = async () => {
-  let res = await fetch(`https://api.withyotta.com/v1/app/${CONFIG.WAGER_CURRENCY.toLowerCase()}/balance`, {
-    "headers": {
-      "accept": "application/json, text/plain, */*",
-      "accept-language": "en-US,en;q=0.9",
-      "app_name": "Yotta",
-      "app_version": "6.19.154",
-      "authorization": "Bearer " + CONFIG.API_TOKEN,
-      "device_id": CONFIG.DEVICE_ID,
-      "device_name": "Chrome",
-      "if-none-match": "W/\"f-nAZyQgQl32Vjcvuuv+70v78aIso\"",
-      "platform": "web",
-      "priority": "u=1, i",
-      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
-      "sec-ch-ua-mobile": "?1",
-      "sec-ch-ua-platform": "\"Android\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-site"
-    },
-    "referrer": "https://members.withyotta.com/",
-    "body": null,
-    "method": "GET",
-    "mode": "cors",
-    "credentials": "include"
-  });
+  const makeRequest = async () => {
+    let res = await fetch(`https://api.withyotta.com/v1/app/${CONFIG.WAGER_CURRENCY.toLowerCase()}/balance`, {
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "en-US,en;q=0.9",
+        "app_name": "Yotta",
+        "app_version": "6.19.154",
+        "authorization": "Bearer " + CONFIG.API_TOKEN,
+        "device_id": CONFIG.DEVICE_ID,
+        "device_name": "Chrome",
+        "if-none-match": "W/\"f-nAZyQgQl32Vjcvuuv+70v78aIso\"",
+        "platform": "web",
+        "priority": "u=1, i",
+        "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+        "sec-ch-ua-mobile": "?1",
+        "sec-ch-ua-platform": "\"Android\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site"
+      },
+      "referrer": "https://members.withyotta.com/",
+      "body": null,
+      "method": "GET",
+      "mode": "cors",
+      "credentials": "include"
+    });
 
-  if (!res.ok) {
-    console.error(`[getBalance] HTTP Error: ${res.status} ${res.error}`);
-    return null;
-  }
+    if (!res.ok) {
+      throw new Error(`HTTP Error: ${res.status} ${res.statusText}`);
+    }
 
-  res = await res.json();
+    res = await res.json();
+    return CONFIG.WAGER_CURRENCY === "YOTTA_CASH" ? parseFloat(res.available) : parseInt(res.balance);
+  };
 
-  return CONFIG.WAGER_CURRENCY === "YOTTA_CASH" ? parseFloat(res.available) : parseInt(res.balance);
+  return await retryWithBackoff(makeRequest);
 };
 
 const run = async () => {
@@ -112,9 +157,19 @@ const run = async () => {
 
   console.log("Rolling dice with bet: " + currentBetAmount);
   let rollResult = await roll(currentBetAmount, CONFIG.THRESHOLD, CONFIG.DIRECTION);
-  if (rollResult === null) return; // Errored, so lets stop here.
+  if (rollResult === null) {
+    console.error("Roll failed after all retries, waiting before next attempt...");
+    setTimeout(run, CONFIG.RUN_DELAY * 2); // Wait longer before next attempt
+    return;
+  }
+  
   const newBalance = await getBalance();
-  if (newBalance === null) return; // Errored, so lets stop here.
+  if (newBalance === null) {
+    console.error("Balance fetch failed after all retries, waiting before next attempt...");
+    setTimeout(run, CONFIG.RUN_DELAY * 2); // Wait longer before next attempt
+    return;
+  }
+  
   const diff = newBalance - currentBalance;
   console.log(`Outcome: ${rollResult.won ? 'WIN' : 'LOSS'} | Diff: ${diff.toFixed(2)}`);
 
@@ -172,7 +227,7 @@ const run = async () => {
 console.log("Loading...")
 getBalance().then(loaded => {
   if (loaded === null) {
-    console.error("Failed to load!");
+    console.error("Failed to load after all retries!");
     return;
   }
   console.log("Loaded! Bot is starting now.")
