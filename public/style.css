@@ -1,0 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+#chartContainer {
+    width: 100%;
+    height: 400px;
+    margin: 20px 0;
+}
+
+#controls {
+    margin: 20px 0;
+}
+
+.status {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.connected {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.disconnected {
+    background-color: #f8d7da;
+    color: #721c24;
+}

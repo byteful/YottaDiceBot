@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yotta Dice Bot - Panel</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <h1>Yotta Dice Bot - Dashboard</h1>
+    <div id="connectionStatus" class="status">Status: Connecting...</div>
+    <div style="margin: 100px auto; width: 1200px;"><canvas id="myChart"></canvas></div>
+
+    <p id="currentBalance">Current Balance: $0</p>
+    <p id="totalDifference">Total Win/Loss: $0</p>
+    <p id="currentBet">Current Bet: $0</p>
+    <label for="run">Toggle Running</label>
+    <input type="checkbox" name="run" id="runToggle">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js" integrity="sha512-8BHxHDLsOHx+flIrQ0DrZcea7MkHqRU5GbTHmbdzMRnAaoCIkZ97PqZcXJkKZckMMhqfoeaJE+DNUVuyoQsO3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script defer src="index.js"></script>
+</body>
+</html>
