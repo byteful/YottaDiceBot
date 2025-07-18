@@ -18,6 +18,7 @@ let shouldRun = true;
 
 // direction: "OVER", "UNDER"
 const roll = async (amount, threshold, direction) => {
+  const body = `{"wager_amount":${CONFIG.WAGER_CURRENCY === "YOTTA_CASH" ? amount.toFixed(2) : amount.toFixed(0)},"wager_currency":"${CONFIG.WAGER_CURRENCY}","direction":"${direction}","threshold":${threshold.toFixed(0)},"use_free_play_credit":false}`;
   let res = await fetch("https://api.withyotta.com/v1/app/games/dice", {
     "headers": {
       "accept": "application/json, text/plain, */*",
@@ -38,7 +39,7 @@ const roll = async (amount, threshold, direction) => {
       "sec-fetch-site": "same-site"
     },
     "referrer": "https://members.withyotta.com/",
-    "body": `{"wager_amount":${CONFIG.WAGER_CURRENCY === "YOTTA_CASH" ? amount.toFixed(2) : amount.toFixed(0)},"wager_currency":"${CONFIG.WAGER_CURRENCY}", "direction":"${direction}","threshold":${threshold.toFixed(0)},"use_free_play_credit":false}`,
+    "body": body,
     "method": "POST",
     "mode": "cors",
     "credentials": "include"

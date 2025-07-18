@@ -23,6 +23,6 @@ export default {
     SAFETY_VALUE: 20.00, // 20% of typical starting balance for early protection
     
     // GAME SETTINGS
-    THRESHOLD: 50,
+    THRESHOLD: 53,
     DIRECTION: "OVER",
 }
