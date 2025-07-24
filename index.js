@@ -186,7 +186,7 @@ const run = async () => {
     losses++;
 
     // check stop loss
-    if (newBalance < (lastWinBalance - CONFIG.STOP_LOSS_THRESHOLD)) {
+    if (CONFIG.STOP_LOSS_THRESHOLD > 0 && newBalance < (lastWinBalance - CONFIG.STOP_LOSS_THRESHOLD)) {
       lastWinBalance = newBalance; // has to reset last win balance
       currentBetAmount = CONFIG.STARTING_BET;
       losses = 0;
@@ -210,6 +210,7 @@ const run = async () => {
     console.log("Resetting bet to starting bet because of win: " + currentBetAmount.toFixed(2))
   }
 
+  currentBetAmount = Math.min(currentBetAmount, CONFIG.MAX_BET);
   currentBalance = newBalance;
   io.emit("newData", {
     timestamp: Date.now(),

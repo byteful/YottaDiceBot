@@ -3,7 +3,7 @@ import 'dotenv/config';
 export default {
     DEVELOPMENT: false, // disables betting and only hosts frontend
     API_TOKEN: process.env.API_TOKEN,
-    WAGER_CURRENCY: "YOTTA_CASH", // "TOKENS" or "YOTTA_CASH"
+    WAGER_CURRENCY: "TOKENS", // "TOKENS" or "YOTTA_CASH"
     DEVICE_ID: process.env.DEVICE_ID,
     
     // MATHEMATICALLY OPTIMAL PROGRESSION
@@ -13,16 +13,17 @@ export default {
     LOSS_THRESHOLD: 2, // Consistent with initial threshold
     
     // OPTIMAL TIMING
-    RUN_DELAY: 1000, // Fastest safe execution for compound growth
+    RUN_DELAY: 100, // Fastest safe execution for compound growth
     
     // OPTIMAL BET SIZING
-    STARTING_BET: 0.01, // Keep small for progression math
+    STARTING_BET: 1, // Keep small for progression math
+    MAX_BET: 200,
     
     // MATHEMATICALLY DERIVED RISK MANAGEMENT
-    STOP_LOSS_THRESHOLD: 6.18, // Golden ratio applied to risk management
-    SAFETY_VALUE: 20.00, // 20% of typical starting balance for early protection
+    STOP_LOSS_THRESHOLD: 500, // Golden ratio applied to risk management
+    SAFETY_VALUE: 500, // 20% of typical starting balance for early protection
     
     // GAME SETTINGS
-    THRESHOLD: 53,
+    THRESHOLD: 96,
     DIRECTION: "OVER",
 }
