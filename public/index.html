@@ -3,20 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yotta Dice Bot - Panel</title>
+    <title>Yotta Dice Bot - Dashboard</title>
     <link rel="stylesheet" href="style.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Yotta Dice Bot - Dashboard</h1>
-    <div id="connectionStatus" class="status">Status: Connecting...</div>
-    <div style="margin: 100px auto; width: 1200px;"><canvas id="myChart"></canvas></div>
+    <div class="container">
+        <header>
+            <h1>Yotta Dice Bot Dashboard</h1>
+            <div id="connectionStatus" class="status">Connecting...</div>
+        </header>
 
-    <p id="currentBalance">Current Balance: $0</p>
-    <p id="totalDifference">Total Win/Loss: $0</p>
-    <p id="currentBet">Current Bet: $0</p>
-    <label for="run">Toggle Running</label>
-    <input type="checkbox" name="run" id="runToggle">
+        <div class="dashboard">
+            <div class="chart-container card">
+                <canvas id="myChart"></canvas>
+            </div>
+
+            <div class="live-data-panel card">
+                <h2>Live Data</h2>
+                <div class="data-item" id="currentBalance">
+                    <span class="label">Current Balance</span>
+                    <span class="value">$0.00</span>
+                </div>
+                <div class="data-item" id="totalDifference">
+                     <span class="label">Session P/L</span>
+                    <span class="value gain">$0.00</span>
+                </div>
+                <div class="data-item" id="currentBet">
+                     <span class="label">Current Bet</span>
+                    <span class="value">$0.00</span>
+                </div>
+            </div>
+
+            <div class="stats-panel card">
+                <h2>Session Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item" id="runtime"><span class="label">Runtime:</span><span class="value">0m</span></div>
+                    <div class="stat-item" id="winRate"><span class="label">Win Rate:</span><span class="value">0%</span></div>
+                    <div class="stat-item" id="totalBets"><span class="label">Total Bets:</span><span class="value">0</span></div>
+                    <div class="stat-item" id="wins"><span class="label">Wins:</span><span class="value">0</span></div>
+                    <div class="stat-item" id="losses"><span class="label">Losses:</span><span class="value">0</span></div>
+                    <div class="stat-item" id="totalWagered"><span class="label">Total Wagered:</span><span class="value">$0.00</span></div>
+                    <div class="stat-item" id="currentStreak"><span class="label">Current Streak:</span><span class="value">0W</span></div>
+                    <div class="stat-item" id="maxWinStreak"><span class="label">Max Win Streak:</span><span class="value">0</span></div>
+                    <div class="stat-item" id="maxLossStreak"><span class="label">Max Loss Streak:</span><span class="value">0</span></div>
+                    <div class="stat-item" id="largestWin"><span class="label">Largest Win:</span><span class="value">$0.00</span></div>
+                </div>
+            </div>
+
+            <div class="config-panel card">
+                <h2>Current Configuration</h2>
+                <div id="config-values" class="stats-grid">
+                    <!-- Values will be injected here by JS -->
+                </div>
+            </div>
+
+            <div class="controls-panel card">
+                <h2>Controls</h2>
+                <div class="control-item">
+                    <label for="runToggle">Bot Status:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="runToggle">
+                        <label for="runToggle" class="slider"></label>
+                    </div>
+                    <span id="runStatus" class="bot-status stopped">Stopped</span>
+                </div>
+                <div class="control-item">
+                    <button id="resetStatsBtn">Reset Stats</button>
+                </div>
+                <div class="control-item">
+                    <button id="reloadConfigBtn">Reload Config</button>
+                </div>
+                <div class="control-item">
+                    <button id="manualStopLossBtn" class="danger-btn">Manual Stop Loss</button>
+                </div>
+                <div class="control-item">
+                    <label for="strategySelector">Strategy:</label>
+                    <select id="strategySelector">
+                        <option value="SAFE" selected="selected">Safe</option>
+                        <option value="AGGRESSIVE">Aggressive</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="profitTargetPopup" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <h2>Profit Target Reached!</h2>
+            <p>Congratulations! You've hit your profit target.</p>
+            <p>The bot has been automatically stopped.</p>
+            <button id="closePopupBtn">Acknowledge</button>
+        </div>
+    </div>
+
+    <div id="safetyLimitPopup" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <h2 class="loss">Safety Limit Reached!</h2>
+            <p>The bot has reached its critical safety limit and will now exit.</p>
+            <button id="closeSafetyPopupBtn">Acknowledge</button>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js" integrity="sha512-8BHxHDLsOHx+flIrQ0DrZcea7MkHqRU5GbTHmbdzMRnAaoCIkZ97PqZcXJkKZckMMhqfoeaJE+DNUVuyoQsO3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

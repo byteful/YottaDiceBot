@@ -1,30 +1,319 @@
+:root {
+    --bg-color: #1a1a2e;
+    --card-bg-color: #16213e;
+    --primary-text-color: #e0e0e0;
+    --secondary-text-color: #a0a0e0;
+    --accent-color: #0f3460;
+    --highlight-color: #e94560;
+    --gain-color: #2ecc71;
+    --loss-color: #e74c3c;
+    --border-color: #0f3460;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
+    padding: 20px;
 }
 
-#chartContainer {
-    width: 100%;
-    height: 400px;
-    margin: 20px 0;
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-#controls {
-    margin: 20px 0;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-family: 'Roboto Mono', monospace;
+    color: var(--highlight-color);
+    margin: 0;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: auto;
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--card-bg-color);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.chart-container {
+    grid-column: 1 / 9;
+    grid-row: 1 / 3;
+    height: 500px;
+}
+
+.live-data-panel {
+    grid-column: 9 / 13;
+    grid-row: 1 / 2;
+}
+
+.stats-panel {
+    grid-column: 9 / 13;
+    grid-row: 2 / 3;
+}
+
+.config-panel {
+    grid-column: 1 / 9;
+    grid-row: 3 / 4;
+}
+
+.controls-panel {
+    grid-column: 9 / 13;
+    grid-row: 3 / 4;
+}
+
+h2 {
+    font-family: 'Roboto Mono', monospace;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--highlight-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.data-item,
+.stat-item,
+.control-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    gap: 10px;
+}
+
+.data-item .label,
+.stat-item .label {
+    color: var(--secondary-text-color);
+}
+
+.data-item .value,
+.stat-item .value {
+    font-weight: 700;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px 40px;
+}
+
+#totalDifference .value.gain {
+    color: var(--gain-color);
+}
+
+#totalDifference .value.loss {
+    color: var(--loss-color);
 }
 
 .status {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 4px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: 500;
 }
 
 .connected {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: var(--gain-color);
+    color: white;
 }
 
 .disconnected {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: var(--loss-color);
+    color: white;
+}
+
+.connecting {
+    background-color: #f39c12;
+    color: white;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: var(--gain-color);
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px var(--gain-color);
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+/* Bot Status Indicator */
+.bot-status {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.bot-status.running {
+    color: var(--gain-color);
+}
+
+.bot-status.stopped {
+    color: var(--loss-color);
+}
+
+/* Button */
+#resetStatsBtn,
+#reloadConfigBtn,
+#manualStopLossBtn {
+    background-color: var(--highlight-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+#resetStatsBtn:hover,
+#reloadConfigBtn:hover,
+#manualStopLossBtn:hover {
+    background-color: #d83a56;
+}
+
+#manualStopLossBtn {
+    background-color: #c0392b;
+}
+
+#manualStopLossBtn:hover {
+    background-color: #e74c3c;
+}
+
+.control-item select {
+    background-color: var(--accent-color);
+    color: var(--primary-text-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+}
+
+@media (max-width: 1200px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container,
+    .live-data-panel,
+    .stats-panel,
+    .controls-panel {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .chart-container {
+        height: 400px;
+    }
+}
+
+/* Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+}
+
+.popup-content {
+    background-color: var(--card-bg-color);
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    border: 2px solid var(--highlight-color);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    transform: scale(0.9);
+    transition: transform 0.2s ease-in-out;
+}
+
+.popup-overlay.active .popup-content {
+    transform: scale(1);
+}
+
+.popup-content h2 {
+    color: var(--gain-color);
+    margin-top: 0;
+}
+
+.popup-content p {
+    color: var(--primary-text-color);
+    font-size: 1.1em;
+}
+
+.popup-content button {
+    background-color: var(--highlight-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background-color 0.3s;
+}
+
+.popup-content button:hover {
+    background-color: #d83a56;
 }

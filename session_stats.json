@@ -1,0 +1,13 @@
+{
+  "startTime": 1753368105032,
+  "totalBets": 2081,
+  "wins": 111,
+  "losses": 1970,
+  "maxWinStreak": 2,
+  "maxLossStreak": 101,
+  "currentWinStreak": 0,
+  "currentLossStreak": 20,
+  "largestWin": 1091,
+  "largestLoss": 118.18463024702655,
+  "totalWagered": 15534.226494319324
+}

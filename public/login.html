@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Yotta Dice Bot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Yotta Dice Bot Login</h1>
+        </header>
+        <div class="login-container card">
+            <form id="loginForm">
+                <div class="form-item">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-item">
+                    <button type="submit">Login</button>
+                </div>
+            </form>
+            <p id="error-message" class="error-text"></p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = e.target.password.value;
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password })
+            });
+
+            if (res.ok) {
+                window.location.href = '/';
+            } else {
+                const error = await res.json();
+                document.getElementById('error-message').textContent = error.message;
+            }
+        });
+    </script>
+</body>
+</html>
